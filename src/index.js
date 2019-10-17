@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import ReactDOM from 'react-dom'
 import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+import ReactDOM from 'react-dom'
+import './index.css'
 
-const Api = async page => {
+const Api = async () => {
   try {
     const response = await axios({
       method: 'get',
-      url: `https://randomuser.me/api/?page=${page}&results=5`,
+      url: `https://randomuser.me/api/?page=1&results=25`,
     })
     return response
   } catch (error) {
@@ -15,41 +16,45 @@ const Api = async page => {
 }
 
 function Users() {
-  const [page, setPage] = useState(1)
   const [users, setUsers] = useState([])
   const [isLoading, setIsLoading] = useState(false)
 
-  const fetchUsers = async (page, users) => {
+  const fetchUsers = async () => {
     setIsLoading(true)
-    const response = await Api(page)
-    setUsers([...users, ...response.data.results])
+    const response = await Api()
+    setUsers(response.data.results)
     setIsLoading(false)
   }
 
   useEffect(() => {
-    fetchUsers(page, users)
-  }, [page])
+    fetchUsers()
+  }, [])
 
-  const User = ({
+  const User = function({
     user: {
       name: { first },
       picture: { large },
     },
-  }) => <img src={large} alt={first} />
+  }) {
+    return (
+      <figure>
+        <img src={large} alt={first} />
+        <figcaption>{first}</figcaption>
+      </figure>
+    )
+  }
 
   return (
-    <div>
+    <div className="users">
       {isLoading ? (
-        <div>Loading ...</div>
+        <p>Loading ...</p>
       ) : (
-        <div>
+        <React.Fragment>
           {users.map((user, key) => (
             <User key={key} index={key} user={user} />
           ))}
-        </div>
+        </React.Fragment>
       )}
-      <button onClick={() => setUsers([])}>Reset users</button>
-      <button onClick={() => setPage(page + 1)}>Fetch more users</button>
     </div>
   )
 }
